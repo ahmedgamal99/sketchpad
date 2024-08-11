@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import Toolbar from "./components/Toolbar";
 import Canvas from "./components/Canvas";
-import { DrawingMode, CanvasObject, Group } from "./types";
+import { DrawingMode, CanvasObject } from "./types";
 
 const App: React.FC = () => {
   const [drawingMode, setDrawingMode] = useState<DrawingMode>("freehand");
@@ -32,26 +31,9 @@ const App: React.FC = () => {
     }
   };
 
-  const groupObjects = (objectsToGroup: CanvasObject[]) => {
-    if (objectsToGroup.length < 2) return;
+ 
 
-    const newGroup: Group = {
-      id: uuidv4(),
-      objects: objectsToGroup,
-    };
 
-    const newObjects = objects.filter((obj) => !objectsToGroup.includes(obj));
-    newObjects.push(newGroup);
-    setObjects(newObjects);
-    saveState();
-  };
-
-  const ungroupObjects = (group: Group) => {
-    const newObjects = objects.filter((obj) => obj !== group);
-    newObjects.push(...group.objects);
-    setObjects(newObjects);
-    saveState();
-  };
 
   const saveDrawing = () => {
     localStorage.setItem("drawing", JSON.stringify(objects));
@@ -66,7 +48,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-100">
       <Toolbar
         drawingMode={drawingMode}
         setDrawingMode={setDrawingMode}
@@ -77,7 +59,7 @@ const App: React.FC = () => {
         saveDrawing={saveDrawing}
         loadDrawing={loadDrawing}
       />
-      <div className="flex-grow overflow-hidden">
+      <div className="flex-grow bg-white shadow-lg overflow-hidden rounded-lg m-4">
         <Canvas
           drawingMode={drawingMode}
           globalColor={globalColor}

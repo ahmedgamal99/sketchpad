@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { DrawingMode, CanvasObject, Point, Group, DrawingObject } from "../types";
+import { DrawingMode, CanvasObject, Point, DrawingObject } from "../types";
 import { drawObject, isPointInObject, createObject, createGroup } from "../utils/drawingUtils";
 
 interface CanvasProps {
@@ -71,10 +71,11 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
             case "delete":
               setObjects(objects.filter((obj) => obj !== clickedObject));
               break;
-            case "copy":
+            case "copy": {
               const newObject = { ...clickedObject, id: crypto.randomUUID() };
               setObjects([...objects, newObject]);
               break;
+            }
             case "move":
               setSelectedObjects([clickedObject]);
               break;
@@ -132,10 +133,11 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
 
       case "ellipse": {
         if (!startPoint) return;
+
         const radiusX = Math.abs(currentPoint.x - startPoint.x) / 2;
         const radiusY = Math.abs(currentPoint.y - startPoint.y) / 2;
-        const centerX = Math.min(startPoint.x, currentPoint.x) + radiusX;
-        const centerY = Math.min(startPoint.y, currentPoint.y) + radiusY;
+        const centerX = startPoint.x + (currentPoint.x - startPoint.x) / 2;
+        const centerY = startPoint.y + (currentPoint.y - startPoint.y) / 2;
         ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
         break;
       }

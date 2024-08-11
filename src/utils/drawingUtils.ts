@@ -22,8 +22,8 @@ const drawShapes = {
     const [start, end] = obj.points;
     const radiusX = Math.abs(end.x - start.x) / 2;
     const radiusY = Math.abs(end.y - start.y) / 2;
-    const centerX = start.x + radiusX;
-    const centerY = start.y + radiusY;
+    const centerX = (start.x + end.x) / 2;
+    const centerY = (start.y + end.y) / 2;
     ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
   },
   circle: (ctx: CanvasRenderingContext2D, obj: DrawingObject) => {
@@ -60,6 +60,7 @@ export const isPointInObject = (point: Point, obj: CanvasObject): boolean => {
   } else {
     if (!offscreenCtx) return false;
     offscreenCtx.clearRect(0, 0, 1, 1);
+    //@ts-expect-error type issue
     drawObject(offscreenCtx, obj);
     return offscreenCtx.isPointInStroke(point.x, point.y);
   }
