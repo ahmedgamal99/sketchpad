@@ -1,66 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple SketchPad</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div id="toolbar" class="toolbar">
-        <button id="freehand-btn" class="toolbar-btn">Freehand
-            <span class="tooltip">Draw freehand lines by clicking and dragging.</span>
-        </button>
-        <button id="line-btn" class="toolbar-btn">Line
-            <span class="tooltip">Draw straight lines by clicking and dragging.</span>
-        </button>
-        <button id="rectangle-btn" class="toolbar-btn">Rectangle
-            <span class="tooltip">Draw rectangles by clicking and dragging.</span>
-        </button>
-        <button id="ellipse-btn" class="toolbar-btn">Ellipse
-            <span class="tooltip">Draw ellipses by clicking and dragging.</span>
-        </button>
-        <button id="circle-btn" class="toolbar-btn">Circle
-            <span class="tooltip">Draw circles by clicking and dragging.</span>
-        </button>
-        <button id="polygon-btn" class="toolbar-btn">Polygon
-            <span class="tooltip">Draw polygons by clicking to add points. Double-click to complete.</span>
-        </button>
-        <input type="color" id="color-picker" class="color-picker" value="#000000" title="Choose color">
-        <button id="move-btn" class="toolbar-btn">Move
-            <span class="tooltip">Move objects by clicking and dragging.</span>
-        </button>
-        <button id="delete-btn" class="toolbar-btn">Delete
-            <span class="tooltip">Delete objects by clicking on them.</span>
-        </button>
-        <button id="copy-btn" class="toolbar-btn">Copy
-            <span class="tooltip">Copy objects by clicking on them, then use paste.</span>
-        </button>
-        <button id="paste-btn" class="toolbar-btn">Paste
-            <span class="tooltip">Paste copied objects by clicking on the canvas.</span>
-        </button>
-        <button id="group-btn" class="toolbar-btn">Group
-            <span class="tooltip">Select objects to group them together.</span>
-        </button>
-        <button id="ungroup-btn" class="toolbar-btn">Ungroup
-            <span class="tooltip">Select a group to ungroup it.</span>
-        </button>
-        <button id="undo-btn" class="toolbar-btn">Undo
-            <span class="tooltip">Undo the last action.</span>
-        </button>
-        <button id="redo-btn" class="toolbar-btn">Redo
-            <span class="tooltip">Redo the last undone action.</span>
-        </button>
-        <button id="save-btn" class="toolbar-btn">Save
-            <span class="tooltip">Save the current drawing to local storage.</span>
-        </button>
-        <button id="load-btn" class="toolbar-btn">Load
-            <span class="tooltip">Load a saved drawing from local storage.</span>
-        </button>
-    </div>
-    <canvas id="drawing-canvas" class="drawing-canvas"></canvas>
-    <script src="js/drawing.js"></script>
-    <script src="js/app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
