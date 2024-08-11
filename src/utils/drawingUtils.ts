@@ -1,12 +1,10 @@
 import { CanvasObject, DrawingObject, Point, Group } from "../types";
 
-// Helper function to set stroke color and initialize path
 const initializeDrawing = (ctx: CanvasRenderingContext2D, obj: DrawingObject) => {
   ctx.strokeStyle = obj.color;
   ctx.beginPath();
 };
 
-// Drawing functions for each shape
 const drawShapes = {
   freehand: (ctx: CanvasRenderingContext2D, obj: DrawingObject) => {
     ctx.moveTo(obj.points[0].x, obj.points[0].y);
@@ -40,10 +38,8 @@ const drawShapes = {
   },
 };
 
-// Main drawing function
 export const drawObject = (ctx: CanvasRenderingContext2D, obj: CanvasObject) => {
-  if ("objects" in obj) {
-    // It's a group, draw each object in the group
+  if (obj.type === "group") {
     obj.objects.forEach((subObj) => drawObject(ctx, subObj));
   } else {
     initializeDrawing(ctx, obj);
@@ -55,17 +51,29 @@ export const drawObject = (ctx: CanvasRenderingContext2D, obj: CanvasObject) => 
   }
 };
 
-// Reuse canvas context for point detection
-const offscreenCanvas = document.createElement("canvas");
+const offscreenCanvas = new OffscreenCanvas(1, 1);
 const offscreenCtx = offscreenCanvas.getContext("2d");
 
 export const isPointInObject = (point: Point, obj: CanvasObject): boolean => {
-  if ("objects" in obj) {
+  if (obj.type === "group") {
     return obj.objects.some((subObj) => isPointInObject(point, subObj));
   } else {
     if (!offscreenCtx) return false;
-
+    offscreenCtx.clearRect(0, 0, 1, 1);
     drawObject(offscreenCtx, obj);
     return offscreenCtx.isPointInStroke(point.x, point.y);
   }
 };
+
+export const createObject = (type: DrawingObject["type"], color: string, points: Point[]): DrawingObject => ({
+  id: crypto.randomUUID(),
+  type,
+  color,
+  points,
+});
+
+export const createGroup = (objects: CanvasObject[]): Group => ({
+  id: crypto.randomUUID(),
+  type: "group",
+  objects,
+});

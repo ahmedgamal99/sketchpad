@@ -28,30 +28,49 @@ const Toolbar: React.FC<ToolbarProps> = ({ drawingMode, setDrawingMode, globalCo
   ];
 
   return (
-    <div className="toolbar flex flex-col gap-2 p-4 bg-gray-800 text-white shadow-lg w-64">
+    <div className="toolbar flex flex-col gap-3 p-4 bg-gray-900 text-white shadow-xl w-72 rounded-lg">
       {buttons.map(({ mode, label, tooltip }) => (
-        <button key={mode} onClick={() => setDrawingMode(mode)} className={`toolbar-btn relative ${drawingMode === mode ? "bg-blue-600" : "bg-gray-700"} p-2 rounded-lg`}>
-          {label}
-          <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">{tooltip}</span>
+        <button
+          key={mode}
+          onClick={() => setDrawingMode(mode)}
+          className={`toolbar-btn flex items-center justify-between ${
+            drawingMode === mode ? "bg-blue-700" : "bg-gray-800"
+          } p-3 rounded-lg transition-colors duration-200 hover:bg-blue-600 focus:outline-none`}
+          title={tooltip}
+        >
+          <span>{label}</span>
+          <span className="tooltip hidden text-xs bg-black text-white rounded p-1 absolute -right-52 w-56">{tooltip}</span>
         </button>
       ))}
-      <input type="color" value={globalColor} onChange={(e) => setGlobalColor(e.target.value)} className="color-picker mt-4 p-2 rounded-lg bg-gray-700" title="Choose color" />
-      <button onClick={undo} className="toolbar-btn bg-gray-700 p-2 rounded-lg mt-4">
-        Undo
-        <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">Undo the last action.</span>
-      </button>
-      <button onClick={redo} className="toolbar-btn bg-gray-700 p-2 rounded-lg">
-        Redo
-        <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">Redo the last undone action.</span>
-      </button>
-      <button onClick={saveDrawing} className="toolbar-btn bg-gray-700 p-2 rounded-lg">
-        Save
-        <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">Save the current drawing to local storage.</span>
-      </button>
-      <button onClick={loadDrawing} className="toolbar-btn bg-gray-700 p-2 rounded-lg">
-        Load
-        <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">Load a saved drawing from local storage.</span>
-      </button>
+      <div className="flex flex-col gap-2 mt-4">
+        <input
+          type="color"
+          value={globalColor}
+          onChange={(e) => setGlobalColor(e.target.value)}
+          className="color-picker p-3 rounded-lg bg-gray-800 border border-gray-700 hover:bg-gray-700 focus:outline-none"
+          title="Choose color"
+        />
+        <button onClick={undo} className="toolbar-btn bg-gray-800 p-3 rounded-lg transition-colors duration-200 hover:bg-blue-600 focus:outline-none" title="Undo the last action.">
+          Undo
+        </button>
+        <button onClick={redo} className="toolbar-btn bg-gray-800 p-3 rounded-lg transition-colors duration-200 hover:bg-blue-600 focus:outline-none" title="Redo the last undone action.">
+          Redo
+        </button>
+        <button
+          onClick={saveDrawing}
+          className="toolbar-btn bg-gray-800 p-3 rounded-lg transition-colors duration-200 hover:bg-blue-600 focus:outline-none"
+          title="Save the current drawing to local storage."
+        >
+          Save
+        </button>
+        <button
+          onClick={loadDrawing}
+          className="toolbar-btn bg-gray-800 p-3 rounded-lg transition-colors duration-200 hover:bg-blue-600 focus:outline-none"
+          title="Load a saved drawing from local storage."
+        >
+          Load
+        </button>
+      </div>
     </div>
   );
 };

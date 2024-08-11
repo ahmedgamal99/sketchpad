@@ -1,23 +1,19 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { DrawingMode, DrawingObject, Point, CanvasObject, Group } from "../types";
-import { drawObject, isPointInObject } from "../utils/drawingUtils";
+import { DrawingMode, CanvasObject, Point, Group, DrawingObject } from "../types";
+import { drawObject, isPointInObject, createObject, createGroup } from "../utils/drawingUtils";
 
 interface CanvasProps {
   drawingMode: DrawingMode;
   globalColor: string;
   objects: CanvasObject[];
   setObjects: React.Dispatch<React.SetStateAction<CanvasObject[]>>;
-  groupObjects: (objectsToGroup: CanvasObject[]) => void;
-  ungroupObjects: (group: Group) => void;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setObjects, groupObjects, ungroupObjects }) => {
+const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setObjects }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState<Point | null>(null);
-  const [endPoint, setEndPoint] = useState<Point | null>(null);
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const [selectedObjects, setSelectedObjects] = useState<CanvasObject[]>([]);
   const [polygonPoints, setPolygonPoints] = useState<Point[]>([]);
@@ -28,12 +24,10 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       objects.forEach((obj) => drawObject(ctx, obj));
 
-      // Highlight selected objects
       ctx.strokeStyle = "blue";
       ctx.lineWidth = 3;
       selectedObjects.forEach((obj) => drawObject(ctx, obj));
 
-      // Reset to global color
       ctx.strokeStyle = globalColor;
       ctx.lineWidth = 2;
     }
@@ -68,44 +62,33 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
 
       case "move":
       case "delete":
-      case "copy": {
+      case "copy":
+      case "group":
+      case "ungroup": {
         const clickedObject = objects.find((obj) => isPointInObject(point, obj));
         if (clickedObject) {
           switch (drawingMode) {
             case "delete":
               setObjects(objects.filter((obj) => obj !== clickedObject));
               break;
-
             case "copy":
-              const newObject = { ...clickedObject, id: uuidv4() };
+              const newObject = { ...clickedObject, id: crypto.randomUUID() };
               setObjects([...objects, newObject]);
               break;
-
             case "move":
               setSelectedObjects([clickedObject]);
+              break;
+            case "group":
+              setSelectedObjects((prev) => (prev.includes(clickedObject) ? prev.filter((obj) => obj !== clickedObject) : [...prev, clickedObject]));
+              break;
+            case "ungroup":
+              if (clickedObject.type === "group") {
+                setObjects((prev) => [...prev.filter((obj) => obj !== clickedObject), ...clickedObject.objects]);
+              }
               break;
           }
         } else {
           setSelectedObjects([]);
-        }
-        break;
-      }
-
-      case "group": {
-        const clickedObject = objects.find((obj) => isPointInObject(point, obj));
-        if (clickedObject) {
-          setSelectedObjects((prevSelected) => {
-            const newSelected = prevSelected.includes(clickedObject) ? prevSelected.filter((obj) => obj !== clickedObject) : [...prevSelected, clickedObject];
-            return newSelected;
-          });
-        }
-        break;
-      }
-
-      case "ungroup": {
-        const clickedGroup = objects.find((obj) => "objects" in obj && isPointInObject(point, obj)) as Group | undefined;
-        if (clickedGroup) {
-          ungroupObjects(clickedGroup);
         }
         break;
       }
@@ -118,113 +101,102 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !startPoint) return;
+    if (!isDrawing && drawingMode !== "polygon") return; // Ensure we only handle mouse move during drawing or polygon mode
     const ctx = ctxRef.current;
     if (!ctx) return;
 
     const currentPoint: Point = { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY };
-    setEndPoint(currentPoint);
 
     redrawCanvas();
     ctx.beginPath();
-    ctx.moveTo(startPoint.x, startPoint.y);
 
     switch (drawingMode) {
       case "freehand":
+        if (!startPoint) return;
         setCurrentPath((prevPath) => [...prevPath, currentPoint]);
+        ctx.moveTo(startPoint.x, startPoint.y);
         currentPath.forEach((point) => ctx.lineTo(point.x, point.y));
         ctx.lineTo(currentPoint.x, currentPoint.y);
         break;
 
       case "line":
+        if (!startPoint) return;
+        ctx.moveTo(startPoint.x, startPoint.y);
         ctx.lineTo(currentPoint.x, currentPoint.y);
         break;
 
       case "rectangle":
+        if (!startPoint) return;
         ctx.rect(startPoint.x, startPoint.y, currentPoint.x - startPoint.x, currentPoint.y - startPoint.y);
         break;
 
       case "ellipse": {
+        if (!startPoint) return;
         const radiusX = Math.abs(currentPoint.x - startPoint.x) / 2;
         const radiusY = Math.abs(currentPoint.y - startPoint.y) / 2;
-        const centerX = startPoint.x + radiusX;
-        const centerY = startPoint.y + radiusY;
+        const centerX = Math.min(startPoint.x, currentPoint.x) + radiusX;
+        const centerY = Math.min(startPoint.y, currentPoint.y) + radiusY;
         ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
         break;
       }
 
       case "circle": {
+        if (!startPoint) return;
         const radius = Math.sqrt(Math.pow(currentPoint.x - startPoint.x, 2) + Math.pow(currentPoint.y - startPoint.y, 2));
         ctx.arc(startPoint.x, startPoint.y, radius, 0, 2 * Math.PI);
         break;
       }
+
+      case "polygon":
+        ctx.moveTo(polygonPoints[0]?.x, polygonPoints[0]?.y);
+        polygonPoints.forEach((point, index) => {
+          if (index > 0) ctx.lineTo(point.x, point.y);
+        });
+        // Draw the line from the last point to the current mouse position
+        ctx.lineTo(currentPoint.x, currentPoint.y);
+        break;
     }
 
     ctx.stroke();
   };
 
-  const handleMouseUp = () => {
-    if (!isDrawing || !startPoint || !endPoint) return;
+  const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !startPoint) return;
     setIsDrawing(false);
 
-    let newObject: DrawingObject;
+    const endPoint: Point = { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY };
+
+    let newObject: DrawingObject | null = null;
 
     switch (drawingMode) {
       case "freehand":
-        newObject = {
-          id: uuidv4(),
-          type: "freehand",
-          color: globalColor,
-          points: currentPath,
-        };
+        newObject = createObject("freehand", globalColor, currentPath);
         break;
-
       case "line":
-        newObject = {
-          id: uuidv4(),
-          type: "line",
-          color: globalColor,
-          points: [startPoint, endPoint],
-        };
+        newObject = createObject("line", globalColor, [startPoint, endPoint]);
         break;
-
       case "rectangle":
-        newObject = {
-          id: uuidv4(),
-          type: "rectangle",
-          color: globalColor,
-          points: [startPoint, endPoint],
-        };
+        newObject = createObject("rectangle", globalColor, [startPoint, endPoint]);
         break;
-
       case "ellipse":
-      case "circle":
-        newObject = {
-          id: uuidv4(),
-          type: drawingMode,
-          color: globalColor,
-          points: [startPoint, endPoint],
-        };
+        newObject = createObject("ellipse", globalColor, [startPoint, endPoint]);
         break;
-
-      default:
-        return; // Don't create an object for unsupported modes
+      case "circle":
+        newObject = createObject("circle", globalColor, [startPoint, endPoint]);
+        break;
     }
 
-    setObjects((prevObjects) => [...prevObjects, newObject]);
+    if (newObject) {
+      setObjects((prevObjects) => [...prevObjects, newObject!]);
+    }
+
     setCurrentPath([]);
     setStartPoint(null);
-    setEndPoint(null);
   };
 
   const handleDoubleClick = () => {
     if (drawingMode === "polygon" && polygonPoints.length > 2) {
-      const newObject: DrawingObject = {
-        id: uuidv4(),
-        type: "polygon",
-        color: globalColor,
-        points: polygonPoints,
-      };
+      const newObject = createObject("polygon", globalColor, polygonPoints);
       setObjects((prevObjects) => [...prevObjects, newObject]);
       setPolygonPoints([]);
     }
@@ -232,7 +204,8 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
 
   const handleGroupCommand = () => {
     if (selectedObjects.length > 1) {
-      groupObjects(selectedObjects);
+      const newGroup = createGroup(selectedObjects);
+      setObjects((prevObjects) => [...prevObjects.filter((obj) => !selectedObjects.includes(obj)), newGroup]);
       setSelectedObjects([]);
     }
   };
@@ -240,7 +213,11 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
   return (
     <>
       <canvas ref={canvasRef} className="border border-gray-300 bg-white" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onDoubleClick={handleDoubleClick} />
-      {drawingMode === "group" && selectedObjects.length > 1 && <button onClick={handleGroupCommand}>Group Selected Objects</button>}
+      {drawingMode === "group" && selectedObjects.length > 1 && (
+        <button onClick={handleGroupCommand} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded">
+          Group Selected Objects
+        </button>
+      )}
     </>
   );
 };
