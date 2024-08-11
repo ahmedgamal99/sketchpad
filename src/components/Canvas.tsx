@@ -91,7 +91,19 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
         setPolygonPoints([...polygonPoints, point]);
         break;
 
-      case "move":
+      case "move": {
+        const clickedObject = objects.find((obj) => isPointInObject(point, obj));
+        if (clickedObject) {
+          setSelectedObjects([clickedObject]);
+          setIsMoving(true);
+          setStartPoint(point);
+        } else {
+          setSelectedObjects([]);
+          setIsMoving(false);
+        }
+        break;
+      }
+
       case "delete":
       case "copy":
       case "group":
@@ -123,8 +135,9 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
                 ...obj,
                 objects: obj.objects.map((groupObj) => ({
                   ...groupObj,
+                  //@ts-expect-error data 
                   points: groupObj.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-                })),
+                })), 
               };
             } else {
               return {
@@ -201,6 +214,7 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
   const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (isMoving) {
       setIsMoving(false);
+      setSelectedObjects([]);
       return;
     }
 
