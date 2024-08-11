@@ -31,10 +31,6 @@ const App: React.FC = () => {
     }
   };
 
- 
-
-
-
   const saveDrawing = () => {
     localStorage.setItem("drawing", JSON.stringify(objects));
   };
