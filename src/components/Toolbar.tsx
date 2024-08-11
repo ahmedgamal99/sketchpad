@@ -28,29 +28,29 @@ const Toolbar: React.FC<ToolbarProps> = ({ drawingMode, setDrawingMode, globalCo
   ];
 
   return (
-    <div className="toolbar flex flex-wrap gap-2 p-4 bg-white shadow-md">
+    <div className="toolbar flex flex-col gap-2 p-4 bg-gray-800 text-white shadow-lg w-64">
       {buttons.map(({ mode, label, tooltip }) => (
-        <button key={mode} onClick={() => setDrawingMode(mode)} className={`toolbar-btn relative ${drawingMode === mode ? "bg-blue-600" : ""}`}>
+        <button key={mode} onClick={() => setDrawingMode(mode)} className={`toolbar-btn relative ${drawingMode === mode ? "bg-blue-600" : "bg-gray-700"} p-2 rounded-lg`}>
           {label}
-          <span className="tooltip">{tooltip}</span>
+          <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">{tooltip}</span>
         </button>
       ))}
-      <input type="color" value={globalColor} onChange={(e) => setGlobalColor(e.target.value)} className="color-picker" title="Choose color" />
-      <button onClick={undo} className="toolbar-btn">
+      <input type="color" value={globalColor} onChange={(e) => setGlobalColor(e.target.value)} className="color-picker mt-4 p-2 rounded-lg bg-gray-700" title="Choose color" />
+      <button onClick={undo} className="toolbar-btn bg-gray-700 p-2 rounded-lg mt-4">
         Undo
-        <span className="tooltip">Undo the last action.</span>
+        <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">Undo the last action.</span>
       </button>
-      <button onClick={redo} className="toolbar-btn">
+      <button onClick={redo} className="toolbar-btn bg-gray-700 p-2 rounded-lg">
         Redo
-        <span className="tooltip">Redo the last undone action.</span>
+        <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">Redo the last undone action.</span>
       </button>
-      <button onClick={saveDrawing} className="toolbar-btn">
+      <button onClick={saveDrawing} className="toolbar-btn bg-gray-700 p-2 rounded-lg">
         Save
-        <span className="tooltip">Save the current drawing to local storage.</span>
+        <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">Save the current drawing to local storage.</span>
       </button>
-      <button onClick={loadDrawing} className="toolbar-btn">
+      <button onClick={loadDrawing} className="toolbar-btn bg-gray-700 p-2 rounded-lg">
         Load
-        <span className="tooltip">Load a saved drawing from local storage.</span>
+        <span className="tooltip absolute text-xs bg-black text-white rounded p-1 opacity-0 hover:opacity-100 -right-20 w-48">Load a saved drawing from local storage.</span>
       </button>
     </div>
   );

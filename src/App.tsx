@@ -18,19 +18,17 @@ const App: React.FC = () => {
 
   const undo = () => {
     if (undoStack.length > 0) {
-      const previousState = undoStack[undoStack.length - 1];
+      const previousState = undoStack.pop()!;
       setRedoStack([...redoStack, objects]);
       setObjects(previousState);
-      setUndoStack(undoStack.slice(0, -1));
     }
   };
 
   const redo = () => {
     if (redoStack.length > 0) {
-      const nextState = redoStack[redoStack.length - 1];
+      const nextState = redoStack.pop()!;
       setUndoStack([...undoStack, objects]);
       setObjects(nextState);
-      setRedoStack(redoStack.slice(0, -1));
     }
   };
 
@@ -68,7 +66,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex h-screen">
       <Toolbar
         drawingMode={drawingMode}
         setDrawingMode={setDrawingMode}
