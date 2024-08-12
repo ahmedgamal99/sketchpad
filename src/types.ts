@@ -6,15 +6,17 @@ export interface Point {
   y: number;
 }
 
-export interface DrawingObject {
+export interface BaseObject {
   id: string;
-  type: Exclude<DrawingMode, "move" | "delete" | "copy" | "group" | "ungroup">;
   color: string;
+}
+
+export interface DrawingObject extends BaseObject {
+  type: Exclude<DrawingMode, "move" | "delete" | "copy" | "group" | "ungroup">;
   points: Point[];
 }
 
-export interface Group {
-  id: string;
+export interface Group extends BaseObject {
   type: "group";
   objects: CanvasObject[];
 }

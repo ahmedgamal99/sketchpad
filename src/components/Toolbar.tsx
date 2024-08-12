@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { DrawingMode } from "../types";
-import { FaPencilAlt, FaDrawPolygon, FaRegSquare, FaRegCircle, FaArrowsAlt, FaTrash, FaCopy, FaObjectGroup, FaObjectUngroup, FaUndo, FaRedo, FaSave, FaFolderOpen, FaPalette } from "react-icons/fa";
+import { FaPencilAlt, FaDrawPolygon, FaRegSquare, FaRegCircle, FaArrowsAlt, FaTrash, FaCopy, FaObjectGroup, FaObjectUngroup, FaPalette } from "react-icons/fa";
 import { BsSlashLg } from "react-icons/bs";
 
 interface ToolbarProps {
@@ -52,7 +52,7 @@ const ColorPicker: React.FC<{ color: string; onChange: (color: string) => void }
   );
 };
 
-const Toolbar: React.FC<ToolbarProps> = ({ drawingMode, setDrawingMode, globalColor, setGlobalColor, undo, redo, saveDrawing, loadDrawing }) => {
+const Toolbar: React.FC<ToolbarProps> = ({ drawingMode, setDrawingMode, globalColor, setGlobalColor }) => {
   const buttons: { mode: DrawingMode; label: string; tooltip: string; icon: React.ReactElement }[] = [
     { mode: "freehand", label: "Freehand", tooltip: "Draw freehand lines", icon: <FaPencilAlt /> },
     { mode: "line", label: "Line", tooltip: "Draw straight lines", icon: <BsSlashLg /> },
@@ -89,36 +89,6 @@ const Toolbar: React.FC<ToolbarProps> = ({ drawingMode, setDrawingMode, globalCo
       </div>
       <div className="flex flex-col gap-2 mt-2">
         <ColorPicker color={globalColor} onChange={setGlobalColor} />
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={undo}
-            className="toolbar-btn bg-gray-700 p-2 rounded-lg transition-all duration-200 hover:bg-blue-500 focus:outline-none flex items-center justify-center"
-            title="Undo the last action"
-          >
-            <FaUndo className="mr-1" /> Undo
-          </button>
-          <button
-            onClick={redo}
-            className="toolbar-btn bg-gray-700 p-2 rounded-lg transition-all duration-200 hover:bg-blue-500 focus:outline-none flex items-center justify-center"
-            title="Redo the last undone action"
-          >
-            <FaRedo className="mr-1" /> Redo
-          </button>
-          <button
-            onClick={saveDrawing}
-            className="toolbar-btn bg-gray-700 p-2 rounded-lg transition-all duration-200 hover:bg-blue-500 focus:outline-none flex items-center justify-center"
-            title="Save the current drawing"
-          >
-            <FaSave className="mr-1" /> Save
-          </button>
-          <button
-            onClick={loadDrawing}
-            className="toolbar-btn bg-gray-700 p-2 rounded-lg transition-all duration-200 hover:bg-blue-500 focus:outline-none flex items-center justify-center"
-            title="Load a saved drawing"
-          >
-            <FaFolderOpen className="mr-1" /> Load
-          </button>
-        </div>
       </div>
     </div>
   );
