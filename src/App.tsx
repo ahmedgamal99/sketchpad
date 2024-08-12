@@ -11,7 +11,6 @@ const App: React.FC = () => {
   const [undoStack, setUndoStack] = useState<CanvasObject[][]>([]);
   const [redoStack, setRedoStack] = useState<CanvasObject[][]>([]);
   const [selectedObjects, setSelectedObjects] = useState<CanvasObject[]>([]);
-
   const saveState = useCallback(() => {
     setUndoStack([...undoStack, objects]);
     setRedoStack([]);

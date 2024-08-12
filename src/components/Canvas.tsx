@@ -129,11 +129,9 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
     if (isMoving && drawingMode === "move" && startPoint) {
       const dx = currentPoint.x - startPoint.x;
       const dy = currentPoint.y - startPoint.y;
-
-      console.log("Moving:", isMoving, "Mode:", drawingMode, "Start:", startPoint);
       setObjects((prevObjects) =>
         prevObjects.map((obj) => {
-          if (selectedObjects.includes(obj)) {
+          if (selectedObjects.some((selectedObj) => selectedObj.id === obj.id)) {
             if (obj.type === "group") {
               return {
                 ...obj,
