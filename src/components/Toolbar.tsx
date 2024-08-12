@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { DrawingMode } from "../types";
-import { FaPencilAlt, FaDrawPolygon, FaRegSquare, FaRegCircle, FaArrowsAlt, FaTrash, FaCopy, FaObjectGroup, FaObjectUngroup, FaPalette } from "react-icons/fa";
+import { FaPencilAlt, FaDrawPolygon, FaRegSquare, FaRegCircle, FaArrowsAlt, FaTrash, FaCopy, FaObjectGroup, FaObjectUngroup, FaPalette, FaPaste } from "react-icons/fa";
 import { BsSlashLg } from "react-icons/bs";
 
 interface ToolbarProps {
@@ -65,6 +65,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ drawingMode, setDrawingMode, globalCo
     { mode: "copy", label: "Copy", tooltip: "Copy objects", icon: <FaCopy /> },
     { mode: "group", label: "Group", tooltip: "Group objects", icon: <FaObjectGroup /> },
     { mode: "ungroup", label: "Ungroup", tooltip: "Ungroup objects", icon: <FaObjectUngroup /> },
+    { mode: "paste", label: "Paste", tooltip: "Paste copied object", icon: <FaPaste /> },
   ];
 
   return (

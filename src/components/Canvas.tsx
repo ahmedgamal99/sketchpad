@@ -9,9 +9,11 @@ interface CanvasProps {
   setObjects: React.Dispatch<React.SetStateAction<CanvasObject[]>>;
   selectedObjects: CanvasObject[];
   setSelectedObjects: React.Dispatch<React.SetStateAction<CanvasObject[]>>;
+  copiedObject: CanvasObject | null;
+  setCopiedObject: React.Dispatch<React.SetStateAction<CanvasObject | null>>;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setObjects, selectedObjects, setSelectedObjects }) => {
+const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setObjects, selectedObjects, setSelectedObjects, copiedObject, setCopiedObject }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -67,8 +69,7 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
           setSelectedObjects(selectedObjects.filter((obj) => obj !== clickedObject));
           break;
         case "copy": {
-          const newObject = { ...clickedObject, id: crypto.randomUUID() };
-          setObjects([...objects, newObject]);
+          setCopiedObject(clickedObject);
           break;
         }
         case "move":
@@ -110,6 +111,21 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
         handleObjectInteraction(clickedObject, point);
         break;
       }
+      case "paste":
+        if (copiedObject) {
+          const newObject = JSON.parse(JSON.stringify(copiedObject));
+          newObject.id = crypto.randomUUID();
+          if (newObject.type !== "group") {
+            const dx = point.x - newObject.points[0].x;
+            const dy = point.y - newObject.points[0].y;
+            newObject.points = newObject.points.map((p: Point) => ({
+              x: p.x + dx,
+              y: p.y + dy,
+            }));
+          }
+          setObjects((prevObjects) => [...prevObjects, newObject]);
+        }
+        break;
 
       default:
         setIsDrawing(true);

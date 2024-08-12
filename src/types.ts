@@ -1,5 +1,5 @@
 // types.ts
-export type DrawingMode = "freehand" | "line" | "rectangle" | "ellipse" | "circle" | "polygon" | "move" | "delete" | "copy" | "group" | "ungroup";
+export type DrawingMode = "freehand" | "line" | "rectangle" | "ellipse" | "circle" | "polygon" | "move" | "delete" | "copy" | "cut" | "group" | "ungroup" | "paste";
 
 export interface Point {
   x: number;
@@ -12,7 +12,7 @@ export interface BaseObject {
 }
 
 export interface DrawingObject extends BaseObject {
-  type: Exclude<DrawingMode, "move" | "delete" | "copy" | "group" | "ungroup">;
+  type: Exclude<DrawingMode, "move" | "delete" | "copy" |"cut"| "group" | "ungroup" | "paste" >;
   points: Point[];
 }
 
