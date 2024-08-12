@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-100;
+}
+
+.toolbar-btn {
+  @apply px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+}
+
+.tooltip {
+  @apply invisible absolute bg-gray-800 text-white text-xs rounded py-1 px-2 -mt-1 ml-2;
+}
+
+.toolbar-btn:hover .tooltip {
+  @apply visible z-10;
+}
+
+.color-picker {
+  @apply w-8 h-8 rounded-full overflow-hidden cursor-pointer;
+}
