@@ -12,6 +12,7 @@ class DrawingUtils {
 
   private static initializeDrawing(ctx: CanvasRenderingContext2D, obj: BaseObject): void {
     ctx.strokeStyle = obj.color;
+    ctx.fillStyle = "#FFFFFF00";
     ctx.beginPath();
   }
 
@@ -58,6 +59,9 @@ class DrawingUtils {
         drawShape(ctx, obj);
       }
       ctx.stroke();
+      if (obj.type !== "line" && obj.type !== "freehand") {
+        ctx.fill();
+      }
     }
   }
 
@@ -66,10 +70,17 @@ class DrawingUtils {
       return obj.objects.some((subObj) => this.isPointInObject(point, subObj));
     } else {
       if (!this.offscreenCtx) return false;
-      this.offscreenCtx.clearRect(0, 0, 1, 1);
+      this.offscreenCanvas.width = Math.max(...obj.points.map((p) => p.x)) + 10;
+      this.offscreenCanvas.height = Math.max(...obj.points.map((p) => p.y)) + 10;
+      this.offscreenCtx.clearRect(0, 0, this.offscreenCanvas.width, this.offscreenCanvas.height);
       //@ts-expect-error type
       this.drawObject(this.offscreenCtx, obj);
-      return this.offscreenCtx.isPointInStroke(point.x, point.y);
+
+      if (obj.type === "line" || obj.type === "freehand") {
+        return this.offscreenCtx.isPointInStroke(point.x, point.y);
+      } else {
+        return this.offscreenCtx.isPointInPath(point.x, point.y) || this.offscreenCtx.isPointInStroke(point.x, point.y);
+      }
     }
   }
 
@@ -86,7 +97,7 @@ class DrawingUtils {
     return {
       id: crypto.randomUUID(),
       type: "group",
-      color: objects[0]?.color ?? "#000000",
+      color: objects[0]?.color ?? "#FFFFFF",
       objects,
     };
   }

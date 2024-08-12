@@ -25,16 +25,21 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
     const ctx = ctxRef.current;
     if (ctx) {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
       objects.forEach((obj) => DrawingUtils.drawObject(ctx, obj));
 
-      ctx.strokeStyle = "blue";
       ctx.lineWidth = 4;
-      selectedObjects.forEach((obj) => DrawingUtils.drawObject(ctx, obj));
+      selectedObjects.forEach((obj) => {
+        const originalStrokeStyle = ctx.strokeStyle;
+        ctx.strokeStyle = drawingMode === "group" ? "red" : "blue";
+        DrawingUtils.drawObject(ctx, obj);
+        ctx.strokeStyle = originalStrokeStyle;
+      });
 
       ctx.strokeStyle = globalColor;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2;
     }
-  }, [objects, selectedObjects, globalColor]);
+  }, [objects, selectedObjects, globalColor, drawingMode]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -96,21 +101,7 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
         setPolygonPoints([...polygonPoints, point]);
         break;
 
-      case "move": {
-        const clickedObject = objects.find((obj) => DrawingUtils.isPointInObject(point, obj));
-        if (clickedObject) {
-          setSelectedObjects([clickedObject]);
-          setIsMoving(true);
-          setStartPoint(point);
-          setMovingObjects([clickedObject]);
-        } else {
-          setSelectedObjects([]);
-          setIsMoving(false);
-          setMovingObjects([]);
-        }
-        break;
-      }
-
+      case "move":
       case "delete":
       case "copy":
       case "group":
@@ -141,13 +132,19 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
               ...obj,
               objects: obj.objects.map((groupObj) => ({
                 ...groupObj,
-                points: (groupObj as DrawingObject).points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
+                points: (groupObj as DrawingObject).points.map((p) => ({
+                  x: p.x + dx,
+                  y: p.y + dy,
+                })),
               })),
             };
           } else {
             return {
               ...obj,
-              points: (obj as DrawingObject).points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
+              points: (obj as DrawingObject).points.map((p) => ({
+                x: p.x + dx,
+                y: p.y + dy,
+              })),
             };
           }
         })
@@ -155,7 +152,6 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
 
       setStartPoint(currentPoint);
 
-      // Update the main objects array immediately
       setObjects((prevObjects) =>
         prevObjects.map((obj) => {
           const movedObject = movingObjects.find((movedObj) => movedObj.id === obj.id);
@@ -163,7 +159,6 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
         })
       );
 
-      // Redraw the canvas with the updated objects
       redrawCanvas();
       return;
     }
@@ -274,7 +269,7 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
     }
   };
 
-  return <canvas ref={canvasRef} className="border border-gray-300 bg-white" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onDoubleClick={handleDoubleClick} />;
+  return <canvas ref={canvasRef} className="bg-white border border-gray-300" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onDoubleClick={handleDoubleClick} />;
 };
 
 export default Canvas;
