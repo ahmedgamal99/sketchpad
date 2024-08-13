@@ -13,9 +13,9 @@ const App: React.FC = () => {
   const [selectedObjects, setSelectedObjects] = useState<CanvasObject[]>([]);
   const [copiedObject, setCopiedObject] = useState<CanvasObject | null>(null);
   const saveState = useCallback(() => {
-    setUndoStack([...undoStack, objects]);
-    setRedoStack([]);
-  }, [objects, undoStack]);
+    setUndoStack((prevUndoStack) => [...prevUndoStack, objects]);
+    setRedoStack([]); // Clear the redo stack whenever a new state is saved
+  }, [objects]);
 
   const undo = () => {
     if (undoStack.length > 0) {
@@ -25,8 +25,18 @@ const App: React.FC = () => {
       setRedoStack([...redoStack, objects]);
       setObjects(previousState);
     }
+    setUndoStack((prevUndoStack) => {
+      if (prevUndoStack.length > 0) {
+        const previousState = prevUndoStack[prevUndoStack.length - 1];
+        setRedoStack((prevRedoStack) => [...prevRedoStack, objects]);
+        setObjects(previousState);
+        return prevUndoStack.slice(0, prevUndoStack.length - 1);
+      }
+      return prevUndoStack;
+    });
   };
   const redo = () => {
+
     if (redoStack.length > 0) {
       const newRedoStack = [...redoStack];
       const nextState = newRedoStack.pop()!;
@@ -34,6 +44,16 @@ const App: React.FC = () => {
       setUndoStack([...undoStack, objects]);
       setObjects(nextState);
     }
+
+    setRedoStack((prevRedoStack) => {
+      if (prevRedoStack.length > 0) {
+        const nextState = prevRedoStack[prevRedoStack.length - 1];
+        setUndoStack((prevUndoStack) => [...prevUndoStack, objects]);
+        setObjects(nextState);
+        return prevRedoStack.slice(0, prevRedoStack.length - 1);
+      }
+      return prevRedoStack;
+    });
   };
 
   const saveDrawing = () => {
@@ -55,9 +75,12 @@ const App: React.FC = () => {
         type: "group",
         objects: selectedObjects,
       } as CanvasObject;
-      setObjects((prevObjects) => [...prevObjects.filter((obj) => !selectedObjects.includes(obj)), newGroup]);
+      setObjects((prevObjects) => {
+        const updatedObjects = [...prevObjects.filter((obj) => !selectedObjects.includes(obj)), newGroup];
+        saveState(); // Save the state before modifying objects
+        return updatedObjects;
+      });
       setSelectedObjects([]);
-      saveState();
     }
   };
 
@@ -87,13 +110,7 @@ const App: React.FC = () => {
                 <button onClick={redo} className="inline-flex items-center px-4 py-2 font-bold text-gray-800 bg-gray-300 rounded hover:bg-gray-400" disabled={redoStack.length === 0}>
                   <FaRedo className="mr-2" /> Redo
                 </button>
-                <button
-                  onClick={handleGroupCommand}
-                  className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center ${selectedObjects.length < 2 ? "opacity-50 cursor-not-allowed" : ""}`}
-                  disabled={selectedObjects.length < 2}
-                >
-                  <FaObjectGroup className="mr-2" /> Group
-                </button>
+                {/* Other toolbar buttons */}
               </div>
               <div className="flex space-x-2">
                 <button onClick={saveDrawing} className="inline-flex items-center px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700">
@@ -116,7 +133,9 @@ const App: React.FC = () => {
                 setCopiedObject={setCopiedObject}
                 saveState={saveState} 
               />
+
             </div>
+            {/* Canvas component rendering */}
           </div>
         </main>
       </div>
