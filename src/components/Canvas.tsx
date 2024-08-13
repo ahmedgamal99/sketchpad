@@ -11,9 +11,20 @@ interface CanvasProps {
   setSelectedObjects: React.Dispatch<React.SetStateAction<CanvasObject[]>>;
   copiedObject: CanvasObject | null;
   setCopiedObject: React.Dispatch<React.SetStateAction<CanvasObject | null>>;
+  saveState: () => void; // Add this prop
 }
 
-const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setObjects, selectedObjects, setSelectedObjects, copiedObject, setCopiedObject }) => {
+const Canvas: React.FC<CanvasProps> = ({
+  drawingMode,
+  globalColor,
+  objects,
+  setObjects,
+  selectedObjects,
+  setSelectedObjects,
+  copiedObject,
+  setCopiedObject,
+  saveState, // Add this prop
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -67,6 +78,7 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
         case "delete":
           setObjects(objects.filter((obj) => obj !== clickedObject));
           setSelectedObjects(selectedObjects.filter((obj) => obj !== clickedObject));
+          saveState(); // Add saveState here
           break;
         case "copy": {
           setCopiedObject(clickedObject);
@@ -77,13 +89,18 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
           setIsMoving(true);
           setStartPoint(point);
           setMovingObjects([clickedObject]);
+          saveState(); // Add saveState here
           break;
         case "group":
           setSelectedObjects((prev) => (prev.includes(clickedObject) ? prev.filter((obj) => obj !== clickedObject) : [...prev, clickedObject]));
           break;
         case "ungroup":
           if (clickedObject.type === "group") {
-            setObjects((prev) => [...prev.filter((obj) => obj !== clickedObject), ...clickedObject.objects]);
+            setObjects((prev) => {
+              const newObjects = [...prev.filter((obj) => obj !== clickedObject), ...clickedObject.objects];
+              saveState(); // Add saveState here
+              return newObjects;
+            });
             setSelectedObjects(selectedObjects.filter((obj) => obj !== clickedObject));
           }
           break;
@@ -123,7 +140,11 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
               y: p.y + dy,
             }));
           }
-          setObjects((prevObjects) => [...prevObjects, newObject]);
+          setObjects((prevObjects) => {
+            const newObjects = [...prevObjects, newObject];
+            saveState(); // Add saveState here
+            return newObjects;
+          });
         }
         break;
 
@@ -168,12 +189,13 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
 
       setStartPoint(currentPoint);
 
-      setObjects((prevObjects) =>
-        prevObjects.map((obj) => {
+      setObjects((prevObjects) => {
+        const newObjects = prevObjects.map((obj) => {
           const movedObject = movingObjects.find((movedObj) => movedObj.id === obj.id);
           return movedObject || obj;
-        })
-      );
+        });
+        return newObjects;
+      });
 
       redrawCanvas();
       return;
@@ -241,6 +263,7 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
       setMovingObjects([]);
       setSelectedObjects([]);
       redrawCanvas();
+      saveState(); // Add saveState here
       return;
     }
 
@@ -270,7 +293,11 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
     }
 
     if (newObject) {
-      setObjects((prevObjects) => [...prevObjects, newObject!]);
+      setObjects((prevObjects) => {
+        const newObjects = [...prevObjects, newObject!];
+        saveState(); // Add saveState here
+        return newObjects;
+      });
     }
 
     setCurrentPath([]);
@@ -280,7 +307,11 @@ const Canvas: React.FC<CanvasProps> = ({ drawingMode, globalColor, objects, setO
   const handleDoubleClick = () => {
     if (drawingMode === "polygon" && polygonPoints.length > 2) {
       const newObject = DrawingUtils.createObject("polygon", globalColor, polygonPoints);
-      setObjects((prevObjects) => [...prevObjects, newObject]);
+      setObjects((prevObjects) => {
+        const newObjects = [...prevObjects, newObject];
+        saveState(); // Add saveState here
+        return newObjects;
+      });
       setPolygonPoints([]);
     }
   };

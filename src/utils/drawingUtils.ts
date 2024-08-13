@@ -76,11 +76,7 @@ class DrawingUtils {
       //@ts-expect-error type
       this.drawObject(this.offscreenCtx, obj);
 
-      if (obj.type === "line" || obj.type === "freehand") {
-        return this.offscreenCtx.isPointInPath(point.x, point.y);
-      } else {
-        return this.offscreenCtx.isPointInPath(point.x, point.y) || this.offscreenCtx.isPointInStroke(point.x, point.y);
-      }
+      return this.offscreenCtx.isPointInPath(point.x, point.y) || this.offscreenCtx.isPointInStroke(point.x, point.y);
     }
   }
 

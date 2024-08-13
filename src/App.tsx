@@ -19,15 +19,18 @@ const App: React.FC = () => {
 
   const undo = () => {
     if (undoStack.length > 0) {
-      const previousState = undoStack.pop()!;
+      const newUndoStack = [...undoStack];
+      const previousState = newUndoStack.pop()!;
+      setUndoStack(newUndoStack);
       setRedoStack([...redoStack, objects]);
       setObjects(previousState);
     }
   };
-
   const redo = () => {
     if (redoStack.length > 0) {
-      const nextState = redoStack.pop()!;
+      const newRedoStack = [...redoStack];
+      const nextState = newRedoStack.pop()!;
+      setRedoStack(newRedoStack);
       setUndoStack([...undoStack, objects]);
       setObjects(nextState);
     }
@@ -111,6 +114,7 @@ const App: React.FC = () => {
                 setSelectedObjects={setSelectedObjects}
                 copiedObject={copiedObject}
                 setCopiedObject={setCopiedObject}
+                saveState={saveState} 
               />
             </div>
           </div>
